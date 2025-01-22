@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { parse, validate } from './app.utils';
-import { ADDRESS, DURAK_TOKEN, ExpiredError } from './app.constants';
+import { ADDRESS, DURAK_TOKEN, ExpiredError, FEE, MIN_WITHDRAW } from './app.constants';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -46,6 +46,10 @@ export class AppService {
   }
 
   async deposit(tg_id: string, currency: string, amount: number) {
+    if (!['not', 'ton', 'usdt'].includes(currency)) {
+      throw new BadRequestException('Invalid currency type');
+    }
+
     let user = await this.prisma.user.findUnique({
       where: { tg_id },
     });
@@ -63,7 +67,37 @@ export class AppService {
     return `ton://transfer/${ADDRESS}?amount=${amount}&text=${text}`;
   }
 
-  async withdraw(tg_id: string, currency: string, amount: number) {
-    
+  async withdraw(tg_id: string, currency: string, amount: number, wallet: string) {
+    if (!['not', 'ton', 'usdt'].includes(currency)) {
+      throw new BadRequestException('Invalid currency type');
+    }
+
+    if (amount < MIN_WITHDRAW[currency]) {
+      throw new ForbiddenException(`Min withdraw ${MIN_WITHDRAW[currency]}`);
+    }
+
+    let user = await this.prisma.user.findUnique({
+      where: { tg_id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user[currency] < amount + FEE[currency]) {
+      throw new ForbiddenException(`Insufficient ${currency} balance`);
+    }
+
+    user = await this.prisma.user.update({
+      where: { tg_id },
+      data: {
+        [currency]: {
+          decrement: amount + FEE[currency],
+        },
+      },
+    });
+
+    return user;
+
   }
 }

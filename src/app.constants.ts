@@ -28,4 +28,18 @@ export class SignInvalidError extends Error {
 
 export const DURAK_TOKEN = process.env.DURAK_TOKEN
 
+export const MNEMONICS = process.env.MNEMONICS
+
+export const FEE = {
+    ton: 0.05,
+    not: 20,
+    usdt: 0.300
+}
+
+export const MIN_WITHDRAW = {
+    ton: 3,
+    not: 100,
+    usdt: 5
+}
+
 export const ADDRESS: string = "UQBYwq42_KLe0BIuYHR1fBKbtvoumU9hAKvMuylJHYZCJzFn"

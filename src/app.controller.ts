@@ -1,10 +1,20 @@
 import { Body, Controller, Get, Post, Headers, Query, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import { DepositDto, WithdrawDto } from './app.dto';
+import { FEE, MIN_WITHDRAW } from './app.constants';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
+
+
+  @Get("settings")
+  async getSettings() {
+    return {
+      fee: FEE,
+      minWithdraw: MIN_WITHDRAW,
+    };
+  }
 
   @Get("user")
   async user(
@@ -31,7 +41,8 @@ export class AppController {
     @Headers('X-API-Key') initData: string,
     @Body() data: WithdrawDto
   ) {
-    
+    const parseData = await this.appService.getUserByInitData(initData, bot);
+    return await this.appService.withdraw(parseData.user.id, data.currency, data.amount, data.wallet);
   }
 
   @Get("user_test/:tg_id")
@@ -54,7 +65,7 @@ export class AppController {
     @Param('tg_id') tg_id: string,
     @Body() data: WithdrawDto
   ) {
-    
+    return await this.appService.withdraw(tg_id, data.currency, data.amount, data.wallet);
   }
 
 

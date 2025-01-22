@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "User" (
-    "id" BIGSERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "tg_id" TEXT NOT NULL,
     "not" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "ton" DOUBLE PRECISION NOT NULL DEFAULT 0,
@@ -14,7 +14,7 @@ CREATE TABLE "Transaction" (
     "id" BIGSERIAL NOT NULL,
     "transaction_id" TEXT NOT NULL,
     "amount" DOUBLE PRECISION NOT NULL,
-    "user_id" BIGINT NOT NULL,
+    "user_id" TEXT NOT NULL,
 
     CONSTRAINT "Transaction_pkey" PRIMARY KEY ("id")
 );
