@@ -1,12 +1,15 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { parse, validate } from './app.utils';
 import { ADDRESS, ExpiredError, FEE, MIN_WITHDRAW } from './app.constants';
 import { PrismaService } from '../prisma/prisma.service';
+import { firstValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 
 @Injectable()
 export class AppService {
   constructor(
-    private prisma: PrismaService
+    private readonly prisma: PrismaService,
+    private readonly httpService: HttpService,
   ) {}
 
   async getUserByInitData(initData: string, bot: string) {
@@ -129,4 +132,49 @@ export class AppService {
   
     return updatedUser;
   }
+
+  async createInvoiceLink({
+    title,
+    description,
+    payload,
+    photo_url,
+    currency,
+    prices,
+ }: {
+    title: string;
+    description: string;
+    payload: string;
+    photo_url: string;
+    currency: string;
+    prices: { label: string; amount: number }[];
+ }): Promise<string> {
+    const apiUrl = `https://api.telegram.org/bot${process.env.DURAK_TOKEN}/createInvoiceLink`;
+
+    try {
+       const response = await firstValueFrom(
+          this.httpService.get(apiUrl, {
+             params: {
+                title,
+                description,
+                payload,
+                photo_url,
+                currency,
+                prices: JSON.stringify(prices),
+             },
+          }),
+       );
+
+       if (response.data?.ok) {
+          return response.data.result;
+       } else {
+          throw new BadRequestException(
+             `Oops! Something went wrong on our end. Please try again later: ${response.data?.description || 'Unknown error'}`,
+          );
+       }
+    } catch (error) {
+       throw new InternalServerErrorException(
+          `Oops! Something went wrong on our end. Please try again later: ${error.message || error}`,
+       );
+    }
+ }
 }

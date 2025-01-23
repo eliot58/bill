@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Headers, Query, Param, ForbiddenException } from '@nestjs/common';
+import { Body, Controller, Get, Post, Headers, Query, Param, ForbiddenException, ParseIntPipe } from '@nestjs/common';
 import { AppService } from './app.service';
 import { DepositDto, UpdateBalanceDto, WithdrawDto } from './app.dto';
 import { FEE, MIN_WITHDRAW } from './app.constants';
@@ -79,6 +79,25 @@ export class AppController {
     }
 
     return await this.appService.update_balance(data.tg_id, data.value, data.currency);
+  }
+
+  @Get('getInvoiceLink')
+  async getInvoiceLink(
+    @Query('amount', ParseIntPipe) amount: number
+  ) {
+
+    const prices = [
+      { label: 'XTR', amount: 100 * amount },
+    ];
+
+    return this.appService.createInvoiceLink({
+      title: `${amount} Fool`,
+      description: `${amount} Fool`,
+      photo_url: "https://cdn.notwise.co/energyRefill.jpg",
+      payload: `${amount}`,
+      currency: 'XTR',
+      prices,
+    });
   }
 
 
