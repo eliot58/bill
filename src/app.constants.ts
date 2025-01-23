@@ -26,10 +26,6 @@ export class SignInvalidError extends Error {
     }
 }
 
-export const DURAK_TOKEN = process.env.DURAK_TOKEN
-
-export const MNEMONICS = process.env.MNEMONICS
-
 export const FEE = {
     ton: 0.05,
     not: 20,

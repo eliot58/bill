@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { parse, validate } from './app.utils';
-import { ADDRESS, DURAK_TOKEN, ExpiredError, FEE, MIN_WITHDRAW } from './app.constants';
+import { ADDRESS, ExpiredError, FEE, MIN_WITHDRAW } from './app.constants';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class AppService {
   async getUserByInitData(initData: string, bot: string) {
     try {
       if (bot == "durak") {
-        validate(initData, DURAK_TOKEN, 5 * 60);
+        validate(initData, process.env.DURAK_TOKEN, 5 * 60);
       } else {
         throw new NotFoundException("Bot not found");
       }
@@ -99,5 +99,34 @@ export class AppService {
 
     return user;
 
+  }
+
+  async update_balance(tg_id: string, value: number, currency: string) {
+    if (!['not', 'ton', 'usdt'].includes(currency)) {
+      throw new BadRequestException('Invalid currency type');
+    }
+  
+    const user = await this.prisma.user.findUnique({
+      where: { tg_id },
+    });
+  
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+  
+    if (value < 0 && user[currency] + value < 0) {
+      throw new ForbiddenException(`Insufficient ${currency} balance`);
+    }
+  
+    const updatedUser = await this.prisma.user.update({
+      where: { tg_id },
+      data: {
+        [currency]: {
+          increment: value,
+        },
+      },
+    });
+  
+    return updatedUser;
   }
 }

@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Post, Headers, Query, Param } from '@nestjs/common';
+import { Body, Controller, Get, Post, Headers, Query, Param, ForbiddenException } from '@nestjs/common';
 import { AppService } from './app.service';
-import { DepositDto, WithdrawDto } from './app.dto';
+import { DepositDto, UpdateBalanceDto, WithdrawDto } from './app.dto';
 import { FEE, MIN_WITHDRAW } from './app.constants';
 
 @Controller()
@@ -45,8 +45,8 @@ export class AppController {
     return await this.appService.withdraw(parseData.user.id, data.currency, data.amount, data.wallet);
   }
 
-  @Get("user_test/:tg_id")
-  async user_test(
+  @Get("user/:tg_id")
+  async get_user(
     @Param('tg_id') tg_id: string
   ) {
     return await this.appService.getUserByTgId(tg_id);
@@ -66,6 +66,19 @@ export class AppController {
     @Body() data: WithdrawDto
   ) {
     return await this.appService.withdraw(tg_id, data.currency, data.amount, data.wallet);
+  }
+
+
+  @Post("update_balance")
+  async update_balance(
+    @Headers('X-API-Key') api_key: string,
+    @Body() data: UpdateBalanceDto
+  ) {
+    if (api_key !== process.env.API_KEY) {
+      throw new ForbiddenException("Invalid Api Key");
+    }
+
+    return await this.appService.update_balance(data.tg_id, data.value, data.currency);
   }
 
 

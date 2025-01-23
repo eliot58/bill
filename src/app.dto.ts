@@ -34,3 +34,21 @@ export class WithdrawDto {
   @IsDefined()
   wallet: string;
 }
+
+
+export class UpdateBalanceDto {
+  @ApiProperty()
+  @IsString()
+  @IsDefined()
+  tg_id: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsDefined()
+  currency: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsDefined()
+  value: number;
+}
