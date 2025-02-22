@@ -1,6 +1,6 @@
 export class ExpiredError extends Error {
     constructor() {
-        super('init data expired');
+        super('Init data expired');
         this.name = 'ExpiredError';
     }
 }

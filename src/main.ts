@@ -6,7 +6,6 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-
   const corsOptions: CorsOptions = {
     origin: ['https://durak.xuton.uno', 'http://0.0.0.0:8000', 'http://0.0.0.0:3000', 'http://localhost:8000', 'http://localhost:3000'],
     credentials: true,

@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const tonweb = new TonWeb(new TonWeb.HttpProvider('https://node.masonsplay.com/jsonRPC'))
+const tonweb = new TonWeb(new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC'))
 
 const MY_WALLET_ADDRESS = 'UQBYwq42_KLe0BIuYHR1fBKbtvoumU9hAKvMuylJHYZCJzFn';
 

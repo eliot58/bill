@@ -4,26 +4,30 @@ import { ADDRESS, ExpiredError, FEE, MIN_WITHDRAW } from './app.constants';
 import { PrismaService } from '../prisma/prisma.service';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AppService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly httpService: HttpService,
+    private readonly configService: ConfigService
   ) {}
 
   async getUserByInitData(initData: string, bot: string) {
     try {
-      if (bot == "durak") {
-        validate(initData, process.env.DURAK_TOKEN, 5 * 60);
+      if (bot === "durak") {
+        validate(initData, this.configService.get<string>('DURAK_TOKEN'), 5 * 60);
+      } else if (bot === "dice") {
+        validate(initData, this.configService.get<string>('DICE_TOKEN'), 5 * 60);
       } else {
         throw new NotFoundException("Bot not found");
       }
     } catch (error) {
-        if (error instanceof ExpiredError) {
-            throw new BadRequestException("Init data expired");
-        }
-        throw new BadRequestException("Invalid init data");
+      if (error instanceof ExpiredError) {
+        throw new BadRequestException("Init data expired");
+      }
+      throw new BadRequestException("Invalid init data");
     }
 
     return parse(initData);
