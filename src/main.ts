@@ -9,6 +9,7 @@ async function bootstrap() {
   const corsOptions: CorsOptions = {
     origin: [
       'https://durak.xuton.uno',
+      'https://dice.xuton.uno',
       'http://0.0.0.0:3000',
       'http://localhost:3000',
       'http://127.0.0.1:3000',
