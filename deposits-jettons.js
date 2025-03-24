@@ -12,10 +12,6 @@ const JETTONS_INFO = {
     'USDT': {
         address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
         decimals: 6
-    },
-    'NOT': {
-        address: 'EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT',
-        decimals: 9
     }
 }
 
@@ -117,58 +113,20 @@ const init = async () => {
         const userId = BigInt(parsePayload(payload));
 
         if (jettonName == "USDT") {
-            await prisma.$transaction(async (prismaTransaction) => {
-                const user = await prismaTransaction.user.findUnique({
-                    where: { id: userId }
-                });
-    
-                if (!user) {
-                    console.log(`User with ID ${userId} not found.`);
-                    return;
-                }
-    
-                const updatedUser = await prismaTransaction.user.update({
-                    where: { id: userId },
-                    data: {
-                        usdt: user.usdt + amount / Math.pow(10, JETTONS_INFO.USDT.decimals),
-                    },
-                });
-    
-                await prismaTransaction.transaction.create({
-                    data: {
-                        transaction_id: transactionId,
-                        amount: amount / Math.pow(10, JETTONS_INFO.USDT.decimals),
-                        user_id: updatedUser.id,
-                    },
-                });
-    
+            const user = await prisma.user.findUnique({
+                where: { id: userId }
             });
-        } else if (jettonName == "NOT") {
-            await prisma.$transaction(async (prismaTransaction) => {
-                const user = await prismaTransaction.user.findUnique({
-                    where: { id: userId }
-                });
-    
-                if (!user) {
-                    console.log(`User with ID ${userId} not found.`);
-                    return;
-                }
-    
-                const updatedUser = await prismaTransaction.user.update({
-                    where: { id: userId },
-                    data: {
-                        not: user.not + amount / Math.pow(10, JETTONS_INFO.NOT.decimals),
-                    },
-                });
-    
-                await prismaTransaction.transaction.create({
-                    data: {
-                        transaction_id: transactionId,
-                        amount: amount / Math.pow(10, JETTONS_INFO.NOT.decimals),
-                        user_id: updatedUser.id,
-                    },
-                });
-    
+
+            if (!user) {
+                console.log(`User with ID ${userId} not found.`);
+                return;
+            }
+
+            await prisma.user.update({
+                where: { id: userId },
+                data: {
+                    usdt: user.usdt + amount / Math.pow(10, JETTONS_INFO.USDT.decimals),
+                },
             });
         }
         console.log('Got ' + jettonName + ' jetton deposit ' + amount.toString() + ' units with text comment "' + userId + '"');

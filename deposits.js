@@ -28,32 +28,20 @@ const onTransaction = async (tx) => {
         }
 
         const userId = BigInt(payload);
-        await prisma.$transaction(async (prismaTransaction) => {
-            const user = await prismaTransaction.user.findUnique({
-                where: { id: userId }
-            });
+        const user = await prisma.user.findUnique({
+            where: { id: userId }
+        });
 
-            if (!user) {
-                console.log(`User with ID ${userId} not found.`);
-                return;
-            }
+        if (!user) {
+            console.log(`User with ID ${userId} not found.`);
+            return;
+        }
 
-            const updatedUser = await prismaTransaction.user.update({
-                where: { id: userId },
-                data: {
-                    ton: user.ton + parseFloat(TonWeb.utils.fromNano(value)),
-                },
-            });
-
-            await prismaTransaction.transaction.create({
-                data: {
-                    transaction_id: transactionId,
-                    amount: parseFloat(TonWeb.utils.fromNano(value)),
-                    user_id: updatedUser.id,
-                },
-            });
-
-            console.log(`Successfully processed ${TonWeb.utils.fromNano(value)} TON from ${senderAddress} for user ${userId}`);
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                ton: user.ton + parseFloat(TonWeb.utils.fromNano(value)),
+            },
         });
     }
 };
